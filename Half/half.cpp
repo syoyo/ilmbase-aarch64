@@ -53,10 +53,19 @@ using namespace std;
 // Lookup tables for half-to-float and float-to-half conversion
 //-------------------------------------------------------------
 
-HALF_EXPORT const half::uif half::_toFloat[1 << 16] =
-    #include "toFloat.h"
-HALF_EXPORT const unsigned short half::_eLut[1 << 9] =
-    #include "eLut.h"
+//HALF_EXPORT const half::uif half::_toFloat[1 << 16] =
+//    #include "toFloat.h"
+//HALF_EXPORT const unsigned short half::_eLut[1 << 9] =
+//    #include "eLut.h"
+
+namespace {
+
+	static half::uif _toFloat[1 << 16] = 
+#include "toFloat.h"
+	static unsigned short _eLut[1 << 9] = 
+#include "eLut.h"
+
+}
 
 //-----------------------------------------------
 // Overflow handler for float-to-half conversion;
@@ -308,3 +317,76 @@ printBits (char c[35], float f)
 
     c[34] = 0;
 }
+
+//----------------------------
+// Half-from-float constructor
+//----------------------------
+
+half::half(float f)
+{
+	uif x;
+
+	x.f = f;
+
+	if (f == 0)
+	{
+		//
+		// Common special case - zero.
+		// Preserve the zero's sign bit.
+		//
+
+		_h = (x.i >> 16);
+	}
+	else
+	{
+		//
+		// We extract the combined sign and exponent, e, from our
+		// floating-point number, f.  Then we convert e to the sign
+		// and exponent of the half number via a table lookup.
+		//
+		// For the most common case, where a normalized half is produced,
+		// the table lookup returns a non-zero value; in this case, all
+		// we have to do is round f's significand to 10 bits and combine
+		// the result with e.
+		//
+		// For all other cases (overflow, zeroes, denormalized numbers
+		// resulting from underflow, infinities and NANs), the table
+		// lookup returns zero, and we call a longer, non-inline function
+		// to do the float-to-half conversion.
+		//
+
+		int e = (x.i >> 23) & 0x000001ff;
+
+		e = ::_eLut[e];
+
+		if (e)
+		{
+			//
+			// Simple case - round the significand, m, to 10
+			// bits and combine it with the sign and exponent.
+			//
+
+			int m = x.i & 0x007fffff;
+			_h = e + ((m + 0x00000fff + ((m >> 13) & 1)) >> 13);
+		}
+		else
+		{
+			//
+			// Difficult case - call a function.
+			//
+
+			_h = convert(x.i);
+		}
+	}
+}
+
+
+//------------------------------------------
+// Half-to-float conversion via table lookup
+//------------------------------------------
+
+half::operator float() const
+{
+	return ::_toFloat[_h].f;
+}
+

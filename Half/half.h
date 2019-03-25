@@ -216,8 +216,8 @@ class half
 
     unsigned short                            _h;
 
-    HALF_EXPORT static const uif              _toFloat[1 << 16];
-    HALF_EXPORT static const unsigned short   _eLut[1 << 9];
+    //HALF_EXPORT static const uif              _toFloat[1 << 16];
+    //HALF_EXPORT static const unsigned short   _eLut[1 << 9];
 };
 
 
@@ -425,6 +425,8 @@ half::half ()
 }
 
 
+// Moved to .cpp for make the compiler happy.
+#if 0
 //----------------------------
 // Half-from-float constructor
 //----------------------------
@@ -498,6 +500,7 @@ half::operator float () const
 {
     return _toFloat[_h].f;
 }
+#endif
 
 
 //-------------------------
