@@ -2,9 +2,9 @@
 //
 // Copyright (c) 2002-2012, Industrial Light & Magic, a division of Lucas
 // Digital Ltd. LLC
-// 
+//
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
@@ -16,8 +16,8 @@
 // distribution.
 // *       Neither the name of Industrial Light & Magic nor the names of
 // its contributors may be used to endorse or promote products derived
-// from this software without specific prior written permission. 
-// 
+// from this software without specific prior written permission.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -115,7 +115,7 @@ procrustesRotationAndTranslation (const Vec3<T>* A, const Vec3<T>* B, const T* w
 
     if (weights == 0)
     {
-        for (int i = 0; i < numPoints; ++i)
+        for (size_t i = 0; i < numPoints; ++i)
         {
             Acenter += (V3d) A[i];
             Bcenter += (V3d) B[i];
@@ -124,7 +124,7 @@ procrustesRotationAndTranslation (const Vec3<T>* A, const Vec3<T>* B, const T* w
     }
     else
     {
-        for (int i = 0; i < numPoints; ++i)
+        for (size_t i = 0; i < numPoints; ++i)
         {
             const double w = weights[i];
             weightsSum += w;
@@ -152,12 +152,12 @@ procrustesRotationAndTranslation (const Vec3<T>* A, const Vec3<T>* B, const T* w
     M33d C (0.0);
     if (weights == 0)
     {
-        for (int i = 0; i < numPoints; ++i)
+        for (size_t i = 0; i < numPoints; ++i)
             C += outerProduct ((V3d) B[i] - Bcenter, (V3d) A[i] - Acenter);
     }
     else
     {
-        for (int i = 0; i < numPoints; ++i)
+        for (size_t i = 0; i < numPoints; ++i)
         {
             const double w = weights[i];
             C += outerProduct (w * ((V3d) B[i] - Bcenter), (V3d) A[i] - Acenter);
@@ -176,10 +176,10 @@ procrustesRotationAndTranslation (const Vec3<T>* A, const Vec3<T>* B, const T* w
     if (doScale && numPoints > 1)
     {
         // Finding a uniform scale: let us assume the Q is completely fixed
-        // at this point (solving for both simultaneously seems much harder).  
+        // at this point (solving for both simultaneously seems much harder).
         // We are trying to compute (again, per Golub and van Loan)
         //    min || s*A*Q - B ||_F
-        // Notice that we've jammed a uniform scale in front of the Q.  
+        // Notice that we've jammed a uniform scale in front of the Q.
         // Now, the Frobenius norm (the least squares norm over matrices)
         // has the neat property that it is equivalent to minimizing the trace
         // of M^T*M (see your friendly neighborhood linear algebra text for a
@@ -197,12 +197,12 @@ procrustesRotationAndTranslation (const Vec3<T>* A, const Vec3<T>* B, const T* w
         KahanSum traceATA;
         if (weights == 0)
         {
-            for (int i = 0; i < numPoints; ++i)
+            for (size_t i = 0; i < numPoints; ++i)
                 traceATA += ((V3d) A[i] - Acenter).length2();
         }
         else
         {
-            for (int i = 0; i < numPoints; ++i)
+            for (size_t i = 0; i < numPoints; ++i)
                 traceATA += ((double) weights[i]) * ((V3d) A[i] - Acenter).length2();
         }
 
@@ -232,7 +232,7 @@ procrustesRotationAndTranslation (const Vec3<T>* A, const Vec3<T>* B, const T* w
     //   [ 0 1 0 tb ] [  s*Q  0 ] [ 0 1 0 -ta ] = [ 0 1 0 tb ] [  s*Q  -s*Q*ta ] = [   Q   tb-s*Q*ta ]
     //   [ 0 0 1  | ] [       0 ] [ 0 0 1  |  ]   [ 0 0 1  | ] [           |   ]   [                 ]
     //   [ 0 0 0  1 ] [ 0 0 0 1 ] [ 0 0 0  1  ]   [ 0 0 0  1 ] [ 0 0 0     1   ]   [ 0 0 0    1      ]
-    // (ofc the whole thing is transposed for Imath).  
+    // (ofc the whole thing is transposed for Imath).
     const V3d translate = Bcenter - s*Acenter*Qt;
 
     return M44d (s*Qt.x[0][0], s*Qt.x[0][1], s*Qt.x[0][2], T(0),
@@ -266,7 +266,7 @@ namespace
 //   J * A
 // for the Jacobi rotation J and the matrix A.  This is efficient because we
 // only need to touch exactly the 2 columns that are affected, so we never
-// need to explicitly construct the J matrix.  
+// need to explicitly construct the J matrix.
 template <typename T, int j, int k>
 void
 jacobiRotateRight (IMATH_INTERNAL_NAMESPACE::Matrix33<T>& A,
@@ -313,7 +313,7 @@ jacobiRotateRight (IMATH_INTERNAL_NAMESPACE::Matrix44<T>& A,
 //    'Computation of the Singular Value Decomposition using Mesh-Connected Processors'
 //    by Richard P. Brent, Franklin T. Luk, and Charles Van Loan
 // It breaks the computation into two steps: the first symmetrizes the matrix,
-// and the second diagonalizes the symmetric matrix.  
+// and the second diagonalizes the symmetric matrix.
 template <typename T, int j, int k, int l>
 bool
 twoSidedJacobiRotation (IMATH_INTERNAL_NAMESPACE::Matrix33<T>& A,
@@ -403,7 +403,7 @@ twoSidedJacobiRotation (IMATH_INTERNAL_NAMESPACE::Matrix33<T>& A,
     const T d_2 = s_1*(w*s_2 + x*c_2) + c_1*(y*s_2 + z*c_2);
 
     // For the entries we just zeroed out, we'll just set them to 0, since
-    // they should be 0 up to machine precision.  
+    // they should be 0 up to machine precision.
     A[j][j] = d_1;
     A[k][k] = d_2;
     A[k][j] = 0;
@@ -416,7 +416,7 @@ twoSidedJacobiRotation (IMATH_INTERNAL_NAMESPACE::Matrix33<T>& A,
         //    [ -s1 c1 0 ]    or  [   0 1  0 ]    or  [ 0  c1 s1 ]
         //    [   0  0 1 ]        [ -s1 0 c1 ]        [ 0 -s1 c1 ]
         // This has the effect of adding the (weighted) ith and jth _rows_ to
-        // each other.  
+        // each other.
         const T tau1 = A[j][l];
         const T tau2 = A[k][l];
         A[j][l] = c_1 * tau1 - s_1 * tau2;
@@ -429,7 +429,7 @@ twoSidedJacobiRotation (IMATH_INTERNAL_NAMESPACE::Matrix33<T>& A,
         //    [ -s2 c2 0 ]  or  [   0 1  0 ]  or  [ 0  c2 s2 ]
         //    [   0  0 1 ]      [ -s2 0 c2 ]      [ 0 -s2 c2 ]
         // This has the effect of adding the (weighted) ith and jth _columns_ to
-        // each other.  
+        // each other.
         const T tau1 = A[l][j];
         const T tau2 = A[l][k];
         A[l][j] = c_2 * tau1 - s_2 * tau2;
@@ -437,7 +437,7 @@ twoSidedJacobiRotation (IMATH_INTERNAL_NAMESPACE::Matrix33<T>& A,
     }
 
     // Now apply the rotations to U and V:
-    // Remember that we have 
+    // Remember that we have
     //    R1^T * A * R2 = D
     // This is in the 2x2 case, but after doing a bunch of these
     // we will get something like this for the 3x3 case:
@@ -544,7 +544,7 @@ twoSidedJacobiRotation (IMATH_INTERNAL_NAMESPACE::Matrix44<T>& A,
     const T d_2 = s_1*(w*s_2 + x*c_2) + c_1*(y*s_2 + z*c_2);
 
     // For the entries we just zeroed out, we'll just set them to 0, since
-    // they should be 0 up to machine precision.  
+    // they should be 0 up to machine precision.
     A[j][j] = d_1;
     A[k][k] = d_2;
     A[k][j] = 0;
@@ -567,7 +567,7 @@ twoSidedJacobiRotation (IMATH_INTERNAL_NAMESPACE::Matrix44<T>& A,
         //          j    k
         //
         // This has the effect of adding the (weighted) ith and jth _rows_ to
-        // each other.  
+        // each other.
         const T tau1 = A[j][l];
         const T tau2 = A[k][l];
         A[j][l] = c_1 * tau1 - s_1 * tau2;
@@ -591,7 +591,7 @@ twoSidedJacobiRotation (IMATH_INTERNAL_NAMESPACE::Matrix44<T>& A,
         //          j    k
         //
         // This has the effect of adding the (weighted) ith and jth _columns_ to
-        // each other.  
+        // each other.
         const T tau1 = A[l][j];
         const T tau2 = A[l][k];
         A[l][j] = c_2 * tau1 - s_2 * tau2;
@@ -599,7 +599,7 @@ twoSidedJacobiRotation (IMATH_INTERNAL_NAMESPACE::Matrix44<T>& A,
     }
 
     // Now apply the rotations to U and V:
-    // Remember that we have 
+    // Remember that we have
     //    R1^T * A * R2 = D
     // This is in the 2x2 case, but after doing a bunch of these
     // we will get something like this for the 3x3 case:
@@ -680,7 +680,7 @@ twoSidedJacobiSVD (IMATH_INTERNAL_NAMESPACE::Matrix33<T> A,
     //  [-s1 c1  ] [  * *] [-s2 c2  ] = [* * *]
     //  [       1] [* * *] [       1]   [  * *]
     // However, if we keep doing this, we'll find that the off-diagonal entries
-    // converge to 0 fairly quickly (convergence should be roughly cubic).  The 
+    // converge to 0 fairly quickly (convergence should be roughly cubic).  The
     // result is a diagonal A matrix and a bunch of orthogonal transforms:
     //               [* * *]                [*    ]
     //  L1 L2 ... Ln [* * *] Rn ... R2 R1 = [  *  ]
@@ -691,7 +691,7 @@ twoSidedJacobiSVD (IMATH_INTERNAL_NAMESPACE::Matrix33<T> A,
     // are extremely stable to compute and apply (this is why QR factorization
     // works so well, FWIW) and because (2) by applying everything to the original
     // matrix A instead of computing (A^T * A) we avoid any precision loss that
-    // would result from that.  
+    // would result from that.
     U.makeIdentity();
     V.makeIdentity();
 
@@ -770,7 +770,7 @@ twoSidedJacobiSVD (IMATH_INTERNAL_NAMESPACE::Matrix33<T> A,
                 U[i][2] = -U[i][2];
             S.z = -S.z;
         }
-   
+
         if (V.determinant() < 0)
         {
             for (int i = 0; i < 3; ++i)
@@ -882,7 +882,7 @@ twoSidedJacobiSVD (IMATH_INTERNAL_NAMESPACE::Matrix44<T> A,
                 U[i][3] = -U[i][3];
             S[3] = -S[3];
         }
-   
+
         if (V.determinant() < 0)
         {
             for (int i = 0; i < 4; ++i)
@@ -947,7 +947,7 @@ namespace
 {
 
 template <int j, int k, typename TM>
-inline 
+inline
 void
 jacobiRotateRight (TM& A,
                    const typename TM::BaseType s,
@@ -1006,7 +1006,7 @@ jacobiRotation (Matrix33<T>& A,
     A[k][k] += h;
 
     // For the entries we just zeroed out, we'll just set them to 0, since
-    // they should be 0 up to machine precision.  
+    // they should be 0 up to machine precision.
     A[j][k] = 0;
 
     // We only update upper triagnular elements of A, since
@@ -1016,7 +1016,7 @@ jacobiRotation (Matrix33<T>& A,
     const T nu1 = offd1;
     const T nu2 = offd2;
     offd1 = nu1 - s * (nu2 + tau * nu1);
-    offd2 = nu2 + s * (nu1 - tau * nu2); 
+    offd2 = nu2 + s * (nu1 - tau * nu2);
 
     // Apply rotation to V
     jacobiRotateRight<j, k> (V, s, tau);
@@ -1039,7 +1039,7 @@ jacobiRotation (Matrix44<T>& A,
     const T mu2 = T(2) * y;
 
     // Let's see if rho^(-1) = mu2 / mu1 is less than tol
-    // This test also checks if rho^2 will overflow 
+    // This test also checks if rho^2 will overflow
     // when tol^(-1) < sqrt(limits<T>::max()).
     if (std::abs(mu2) <= tol*std::abs(mu1))
     {
@@ -1066,7 +1066,7 @@ jacobiRotation (Matrix44<T>& A,
         const T nu1 = offd1;
         const T nu2 = offd2;
         offd1 -= s * (nu2 + tau * nu1);
-        offd2 += s * (nu1 - tau * nu2); 
+        offd2 += s * (nu1 - tau * nu2);
     }
 
     {
@@ -1075,7 +1075,7 @@ jacobiRotation (Matrix44<T>& A,
         const T nu1 = offd1;
         const T nu2 = offd2;
         offd1 -= s * (nu2 + tau * nu1);
-        offd2 += s * (nu1 - tau * nu2); 
+        offd2 += s * (nu1 - tau * nu2);
     }
 
     jacobiRotateRight<j, k> (V, s, tau);
@@ -1120,8 +1120,8 @@ jacobiEigenSolver (Matrix33<T>& A,
         {
             // Z is for accumulating small changes (h) to diagonal entries
             // of A for one sweep. Adding h's directly to A might cause
-            // a cancellation effect when h is relatively very small to 
-            // the corresponding diagonal entry of A and 
+            // a cancellation effect when h is relatively very small to
+            // the corresponding diagonal entry of A and
             // this will increase numerical errors
             Vec3<T> Z(0, 0, 0);
             ++numIter;

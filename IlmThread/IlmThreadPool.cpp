@@ -2,9 +2,9 @@
 //
 // Copyright (c) 2005-2012, Industrial Light & Magic, a division of Lucas
 // Digital Ltd. LLC
-// 
+//
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
@@ -16,8 +16,8 @@
 // distribution.
 // *       Neither the name of Industrial Light & Magic nor the names of
 // its contributors may be used to endorse or promote products derived
-// from this software without specific prior written permission. 
-// 
+// from this software without specific prior written permission.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -62,7 +62,7 @@ struct TaskGroup::Data
 {
      Data ();
     ~Data ();
-    
+
     void    addTask () ;
     void    removeTask ();
 #ifndef ILMBASE_FORCE_CXX03
@@ -176,7 +176,7 @@ struct DefaultWorkData
     Semaphore threadSemaphore;      // signaled when a thread starts executing
     mutable Mutex threadMutex;      // mutual exclusion for threads list
     vector<DefaultWorkerThread*> threads;  // the list of all threads
-    
+
 #ifdef ILMBASE_FORCE_CXX03
     bool stopping;                  // flag indicating whether to stop threads
     mutable Mutex stopMutex;        // mutual exclusion for stopping flag
@@ -214,7 +214,7 @@ class DefaultWorkerThread: public Thread
     DefaultWorkerThread (DefaultWorkData* data);
 
     virtual void    run ();
-    
+
   private:
 
     DefaultWorkData *  _data;
@@ -247,7 +247,7 @@ DefaultWorkerThread::run ()
 
         {
             Lock taskLock (_data->taskMutex);
-    
+
             //
             // If there is a task pending, pop off the next task in the FIFO
             //
@@ -379,7 +379,7 @@ DefaultThreadPoolProvider::addTask (Task *task)
             //
             _data.tasks.push_back (task);
         }
-        
+
         //
         // Signal that we have a new task to process
         //
@@ -450,7 +450,7 @@ class NullThreadPoolProvider : public ThreadPoolProvider
         delete t;
     }
     virtual void finish () {}
-}; 
+};
 
 } //namespace
 
@@ -459,7 +459,7 @@ class NullThreadPoolProvider : public ThreadPoolProvider
 // struct TaskGroup::Data
 //
 
-TaskGroup::Data::Data (): isEmpty (1), numPending (0)
+TaskGroup::Data::Data (): numPending(0), isEmpty (1)
 {
     // empty
 }
@@ -494,7 +494,7 @@ TaskGroup::Data::~Data ()
 
 
 void
-TaskGroup::Data::addTask () 
+TaskGroup::Data::addTask ()
 {
     //
     // in c++11, we use an atomic to protect numPending to avoid the
@@ -526,7 +526,7 @@ TaskGroup::Data::removeTask ()
 
     // Further update:
     //
-    // we could remove this if it is a new enough glibc, however 
+    // we could remove this if it is a new enough glibc, however
     // we've changed the API to enable a custom override of a
     // thread pool. In order to provide safe access to the numPending,
     // we need the lock anyway, except for c++11 or newer
@@ -545,14 +545,14 @@ TaskGroup::Data::removeTask ()
     }
 #endif
 }
-    
+
 
 //
 // struct ThreadPool::Data
 //
 
 ThreadPool::Data::Data ():
-    provUsers (0), provider (NULL)
+    provider(NULL), provUsers (0)
 #ifdef ILMBASE_FORCE_CXX03
     , oldprovider (NULL)
 #else
@@ -602,7 +602,7 @@ ThreadPool::Data::coalesceProviderUse ()
     // ov is the previous value, so one means that now it might be 0
     if ( ov == 1 )
     {
-        
+
     }
 #endif
 }
@@ -659,7 +659,7 @@ ThreadPool::Data::setProvider (ThreadPoolProvider *p)
     //
     // (well, and normally, people don't do this mid stream anyway, so
     // this will be 0 99.999% of the time, but just to be safe)
-    // 
+    //
     while ( provUsers.load( std::memory_order_relaxed ) > 0 )
         std::this_thread::yield();
 
@@ -822,7 +822,7 @@ ThreadPool::setThreadProvider (ThreadPoolProvider *provider)
 
 
 void
-ThreadPool::addTask (Task* task) 
+ThreadPool::addTask (Task* task)
 {
     _data->getProvider ()->addTask (task);
 }
@@ -834,7 +834,7 @@ ThreadPool::globalThreadPool ()
     //
     // The global thread pool
     //
-    
+
     static ThreadPool gThreadPool (0);
 
     return gThreadPool;

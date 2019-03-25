@@ -5,15 +5,18 @@ ELSE()
     CMAKE_MINIMUM_REQUIRED(VERSION 3.2)
 ENDIF()
 
+# Force set versioning
+SET(OPENEXR_NAMESPACE_VERSIONING On)
+
 # test if we are being built as a standalone library or if
 # we are being built as part of the overall project
 IF(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
     SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
   ELSE()
-    #MESSAGE(FATAL_ERROR "Please compile using the top-level CMakeLists.txt or a pre-built package")
+    MESSAGE(FATAL_ERROR "Please compile using the top-level CMakeLists.txt or a pre-built package")
   ENDIF()
-  #INCLUDE(OpenEXRVersion)
+  INCLUDE(OpenEXRVersion)
   SET(ILMBASE_STANDALONE ON)
 ENDIF()
 
